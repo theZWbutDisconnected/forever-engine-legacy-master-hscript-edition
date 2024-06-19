@@ -1,0 +1,26 @@
+function onCharacterCreate(name){
+    if(name == 'bf-pixel'){
+        Character.frames = Paths.getSparrowAtlas('characters/bfPixel');
+        Character.animation.addByPrefix('idle', 'BF IDLE', 24, false);
+        Character.animation.addByPrefix('singUP', 'BF UP NOTE', 24, false);
+        Character.animation.addByPrefix('singLEFT', 'BF LEFT NOTE', 24, false);
+        Character.animation.addByPrefix('singRIGHT', 'BF RIGHT NOTE', 24, false);
+        Character.animation.addByPrefix('singDOWN', 'BF DOWN NOTE', 24, false);
+        Character.animation.addByPrefix('singUPmiss', 'BF UP MISS', 24, false);
+        Character.animation.addByPrefix('singLEFTmiss', 'BF LEFT MISS', 24, false);
+        Character.animation.addByPrefix('singRIGHTmiss', 'BF RIGHT MISS', 24, false);
+        Character.animation.addByPrefix('singDOWNmiss', 'BF DOWN MISS', 24, false);
+
+        Character.setGraphicSize(Std.int(Character.width * 6));
+        Character.updateHitbox();
+
+        Character.playAnim('idle');
+
+        Character.width -= 100;
+        Character.height -= 100;
+
+        Character.antialiasing = false;
+
+        Character.flipX = true;
+    }
+}

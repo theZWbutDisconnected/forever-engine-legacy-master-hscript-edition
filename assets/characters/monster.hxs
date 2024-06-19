@@ -1,0 +1,13 @@
+function onCharacterCreate(name){
+    if(name == 'monster'){
+        Character.tex = Paths.getSparrowAtlas('characters/Monster_Assets');
+        Character.frames = Character.tex;
+        Character.animation.addByPrefix('idle', 'monster idle', 24, false);
+        Character.animation.addByPrefix('singUP', 'monster up note', 24, false);
+        Character.animation.addByPrefix('singDOWN', 'monster down', 24, false);
+        Character.animation.addByPrefix('singLEFT', 'Monster Right note', 24, false);
+        Character.animation.addByPrefix('singRIGHT', 'Monster left note', 24, false);
+
+        Character.playAnim('idle');
+    }
+}

@@ -1,0 +1,18 @@
+function onCharacterCreate(name){
+    if(name == 'bf-pixel'){
+        Character.frames = Paths.getSparrowAtlas('characters/bfPixelsDEAD');
+        Character.animation.addByPrefix('singUP', "BF Dies pixel", 24, false);
+        Character.animation.addByPrefix('firstDeath', "BF Dies pixel", 24, false);
+        Character.animation.addByPrefix('deathLoop', "Retry Loop", 24, true);
+        Character.animation.addByPrefix('deathConfirm', "RETRY CONFIRM", 24, false);
+        Character.animation.play('firstDeath');
+
+        // pixel bullshit
+        Character.setGraphicSize(Std.int(Character.width * 6));
+        Character.updateHitbox();
+        Character.antialiasing = false;
+        Character.flipX = true;
+
+        Character.characterData.offsetY = 180;
+    }
+}

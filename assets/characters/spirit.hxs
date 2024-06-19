@@ -1,0 +1,21 @@
+function onCharacterCreate(name){
+    if(name == 'spirit'){
+        Character.frames = Paths.getPackerAtlas('characters/spirit');
+        Character.animation.addByPrefix('idle', "idle spirit_", 24, false);
+        Character.animation.addByPrefix('singUP', "up_", 24, false);
+        Character.animation.addByPrefix('singRIGHT', "right_", 24, false);
+        Character.animation.addByPrefix('singLEFT', "left_", 24, false);
+        Character.animation.addByPrefix('singDOWN', "spirit down_", 24, false);
+
+        Character.setGraphicSize(Std.int(Character.width * 6));
+        Character.updateHitbox();
+
+        Character.playAnim('idle');
+
+        Character.antialiasing = false;
+        Character.characterData.quickDancer = true;
+
+        Character.characterData.camOffsetY = 50;
+        Character.characterData.camOffsetX = 100;
+    }
+}

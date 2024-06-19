@@ -1,0 +1,17 @@
+function onCharacterCreate(name){
+    if(name == 'mom-car'){
+        Character.tex = Paths.getSparrowAtlas('characters/momCar');
+        Character.frames = Character.tex;
+
+        Character.animation.addByPrefix('idle', "Mom Idle", 24, false);
+        Character.animation.addByIndices('idlePost', 'Mom Idle', [10, 11, 12, 13], "", 24, true);
+        Character.animation.addByPrefix('singUP', "Mom Up Pose", 24, false);
+        Character.animation.addByPrefix('singDOWN', "MOM DOWN POSE", 24, false);
+        Character.animation.addByPrefix('singLEFT', 'Mom Left Pose', 24, false);
+        // ANIMATION IS CALLED MOM LEFT POSE BUT ITS FOR THE RIGHT
+        // CUZ DAVE IS DUMB!
+        Character.animation.addByPrefix('singRIGHT', 'Mom Pose Left', 24, false);
+
+        Character.playAnim('idle');
+    }
+}
