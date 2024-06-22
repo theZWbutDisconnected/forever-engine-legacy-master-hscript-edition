@@ -37,11 +37,11 @@ import openfl.utils._internal.Log;
 	```as3
 	var loader:URLLoader = new URLLoader();
 	loader.dataFormat = URLLoaderDataFormat.BINARY;
-	loader.addEventListener(Event.COMPLETE, onLoadComplete);
+	loader.addEventListener(api.Event.COMPLETE, onLoadComplete);
 	loader.load(new URLRequest("myShader.pbj"));
 	var shader:Shader;
 
-	function onLoadComplete(event:Event):void {
+	function onLoadComplete(api:api.Event):void {
 		// Create a new shader and set the loaded data as its bytecode
 		shader = new Shader();
 		shader.byteCode = loader.data;
@@ -93,7 +93,7 @@ import openfl.utils._internal.Log;
 	between two overlapping display objects. Assign the Shader instance to the
 	`blendShader` property of the upper of the two display objects.
 	* Background shader processing: The shader executes in the background,
-	avoiding the possibility of freezing the display, and dispatches an event
+	avoiding the possibility of freezing the display, and dispatches an api
 	when processing is complete. Assign the Shader instance to the `shader`
 	property of a ShaderJob instance.
 

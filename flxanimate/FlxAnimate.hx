@@ -200,7 +200,7 @@ class FlxAnimate extends FlxSprite
 			if (FlxG.mouse.justPressed && !pressed)
 			{
 				if (event != null)
-					new ButtonEvent((event.Callbacks != null) ? event.Callbacks.OnClick : null #if FLX_SOUND_SYSTEM, event.Sound #end).fire();
+					new ButtonEvent((event.Callbacks != null) ? event.Callbacks.OnClick : null #if FLX_SOUND_SYSTEM, api.Sound #end).fire();
 				pressed = true;
 			}
 			if (FlxG.mouse.pressed)
@@ -214,7 +214,7 @@ class FlxAnimate extends FlxSprite
 			if (FlxG.mouse.justReleased && pressed)
 			{
 				if (event != null)
-					new ButtonEvent((event.Callbacks != null) ? event.Callbacks.OnRelease : null #if FLX_SOUND_SYSTEM, event.Sound #end).fire();
+					new ButtonEvent((event.Callbacks != null) ? event.Callbacks.OnRelease : null #if FLX_SOUND_SYSTEM, api.Sound #end).fire();
 				pressed = false;
 			}
 		}

@@ -71,14 +71,9 @@ class HScript
 		interp.variables.set("Std", Std);
 		interp.variables.set("Math", Math);
 		interp.variables.set("StringTools", StringTools);
-		interp.variables.set("Image", Image);
 		interp.variables.set("FileSystem", FileSystem);
 		interp.variables.set("Lib", openfl.Lib);
-		interp.variables.set("Window", Window);
 		interp.variables.set("Application", Application);
-		interp.variables.set("Matrix", Matrix);
-		interp.variables.set("Rectangle", Rectangle);
-		interp.variables.set("Sprite", Sprite);
 		interp.variables.set("Assets", Assets);
 
 		// Classes (Flixel)
@@ -120,7 +115,11 @@ class HScript
 		interp.variables.set("Game", PlayState.instance);
 		interp.variables.set("File", File);
 
+		interp.variables.set("trace", LogUtils.log);
+
 		parser.allowTypes = true;
+		parser.allowJSON = true;
+		parser.allowMetadata = true;
 	}
 
 	public function loadModule(path:String, ?params:StringMap<Dynamic>) {
@@ -132,35 +131,63 @@ class HScript
 	    		interp.variables.set(i, params.get(i));
 	    	}
 	    }
+
+		// importing!!
+
+		interp.variables.set("import", function(className:String)
+		{
+			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
+			// i would LIKE to do like.. flixel.util.* but idk if I can get everything in a namespace
+			var classSplit:Array<String> = className.split(".");
+			var daClassName = classSplit[classSplit.length - 1]; // last one
+			if (daClassName == '*')
+			{
+				var daClass = Type.resolveClass(className);
+				while (classSplit.length > 0 && daClass == null)
+				{
+					daClassName = classSplit.pop();
+					daClass = Type.resolveClass(classSplit.join("."));
+					if (daClass != null)
+						break;
+				}
+				if (daClass != null)
+				{
+					for (field in Reflect.fields(daClass))
+					{
+						interp.variables.set(field, Reflect.field(daClass, field));
+					}
+				}
+				else
+				{
+					FlxG.log.error('Could not import class ${daClass}');
+					trace('Could not import class ${daClass}');
+				}
+			}
+			else
+			{
+				var daClass = Type.resolveClass(className);
+				if (daClass == null)
+				{
+					FlxG.log.error('Could not import class ${daClass}');
+					trace('Could not import class ${daClass}');
+					return;
+				}
+				interp.variables.set(daClassName, daClass);
+			}
+		});
 		interp.execute(parser.parseString(File.getContent(path),path));
 	}
 
-	//from Hypno's Lullaby v2 source code
-	
-	/**
-		* [Returns a field from the module]
-			 * @param field 
-			 * @return Dynamic
-		return interp.variables.get(field)
-	 */
-	public function get(field:String):Dynamic
-		return interp.variables.get(field);
+	public function get(field:String):Dynamic {
+		if (exists(field)) {return interp.variables.get(field);}
+		return {};
+	}
 
-	/**
-	 * [Sets a field within the module to a new value]
-	 * @param field 
-	 * @param value 
-	 * @return interp.variables.set(field, value)
-	 */
-	public function set(field:String, value:Dynamic)
-		interp.variables.set(field, value);
+	public function set(field:String, value:Dynamic) {
+		if (exists(field)) {return interp.variables.set(field, value);}
+		return {};
+	}
 
-	/**
-		* [Checks the existence of a value or exposure within the module]
-		* @param field 
-		* @return Bool
-				return interp.variables.exists(field)
-	 */
 	public function exists(field:String):Bool
 		return interp.variables.exists(field);
 }

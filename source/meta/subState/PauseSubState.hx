@@ -118,13 +118,13 @@ class PauseSubState extends MusicBeatSubState
 	override function update(elapsed:Float)
 	{
 		#if debug
-		// trace('call event');
+		// trace('call api');
 		#end
 
 		super.update(elapsed);
 
 		#if debug
-		// trace('updated event');
+		// trace('updated api');
 		#end
 
 		var upP = controls.UI_UP_P;

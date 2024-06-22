@@ -39,6 +39,7 @@ import openfl.net.FileReference;
 import openfl.utils.ByteArray;
 import sys.io.File;
 
+import sys.FileSystem;
 using StringTools;
 
 /**
@@ -104,13 +105,11 @@ class OriginalChartingState extends MusicBeatState
 	var playTicksDad:FlxUICheckBox = null;
 
 	public static var exposure:StringMap<Dynamic>;
-	public static var eventHandler:HScript;
+	public static var handlers:Array<HScript> = [];
 
 	override function create()
 	{
 		super.create();
-
-		eventHandler = new HScript();
 
 		curSection = lastSection;
 
@@ -202,7 +201,15 @@ class OriginalChartingState extends MusicBeatState
 		exposure.set('name', null);
 		exposure.set('value1', null);
 		exposure.set('value2', null);
-		eventHandler.loadModule(Paths.hxs("hscripts/events"), exposure);
+
+		var dirs = FileSystem.readDirectory("assets/scripts");
+		for (file in dirs) {
+			if (file.endsWith(".hxs")) {
+				var handler = new HScript();
+				handler.loadModule(Paths.scripts(file), exposure);
+				handlers.push(handler);
+			}
+		}
 
 		addSongUI();
 		addSectionUI();
@@ -228,18 +235,26 @@ class OriginalChartingState extends MusicBeatState
 		
 		descText = new FlxText(20, 200, 0, '');
 
-		var events:Array<String> = CoolUtil.coolTextFile(Paths.txt('eventList'));
+		var events:Array<String> = [];
+		for (handler in handlers) {
+			if (handler.exists("returnEventsList"))
+				events = handler.get("returnEventsList")(eventName);
+		}
 
 		eventName = events[0];
 
-		if (eventHandler.exists("returnEventDescription"))
-	    	descText.text = eventHandler.get("returnEventDescription")(eventName);
+		for (handler in handlers) {
+			if (handler.exists("returnEventDescription"))
+				descText.text = handler.get("returnEventDescription")(eventName);
+		}
 
 		var eventDropDown = new FlxUIDropDownMenu(20, 50, FlxUIDropDownMenu.makeStrIdLabelArray(events, true), function(event:String)
 		{
 			eventName = events[Std.parseInt(event)];
-			if (eventHandler.exists("returnEventDescription"))
-				descText.text = eventHandler.get("returnEventDescription")(eventName);
+			for (handler in handlers) {
+				if (handler.exists("returnEventDescription"))
+					descText.text = handler.get("returnEventDescription")(eventName);
+			}
 		});
 		eventDropDown.selectedLabel = eventName;
 
@@ -1074,7 +1089,7 @@ class OriginalChartingState extends MusicBeatState
 			
 			if (daNoteInfo == -1)
 			{
-				noteEventName = new FlxText(note.x - GRID_SIZE / 2, note.y - 0, 720, "Event: " + i[2]);
+				noteEventName = new FlxText(note.x - GRID_SIZE / 2, note.y - 0, 720, "api.Event: " + i[2]);
 				noteEventName.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				noteEventName.x -= noteEventName.width;
 				noteEventValue1 = new FlxText(note.x - GRID_SIZE / 2, note.y + 12, 720, "Value1: " + i[3]);

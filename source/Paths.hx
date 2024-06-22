@@ -288,10 +288,15 @@ class Paths
 	{
 		return getPath('$key.txt', TEXT, library);
 	}
-	
+
 	inline static public function hxs(key:String, ?library:String)
 	{
 		return getPath('$key.hxs', TEXT, library);
+	}
+
+	inline static public function scripts(key:String)
+	{
+		return getPath('scripts/$key', TEXT);
 	}
 
 	inline static public function xml(key:String, ?library:String)

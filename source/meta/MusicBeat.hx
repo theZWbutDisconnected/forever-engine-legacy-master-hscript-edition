@@ -31,7 +31,7 @@ class MusicBeatState extends FNFUIState
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
-	// class create event
+	// class create api
 	override function create()
 	{
 		// dump
@@ -50,7 +50,7 @@ class MusicBeatState extends FNFUIState
 		FlxG.watch.add(this, "curStep");
 	}
 
-	// class 'step' event
+	// class 'step' api
 	override function update(elapsed:Float)
 	{
 		updateContents();

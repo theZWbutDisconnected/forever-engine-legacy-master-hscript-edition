@@ -52,6 +52,7 @@ import openfl.media.Sound;
 import openfl.utils.Assets;
 import sys.io.File;
 
+import sys.FileSystem;
 using StringTools;
 
 #if desktop
@@ -180,7 +181,7 @@ class PlayState extends MusicBeatState
 	// stores the last combo objects in an array
 	public static var lastCombo:Array<FlxSprite>;
 	public static var instance:PlayState;
-	public static var eventHandler:HScript;
+	public static var handlers:Array<HScript> = [];
 
 	public static var exposure:StringMap<Dynamic>;
 	// at the beginning of the playstate
@@ -434,12 +435,24 @@ class PlayState extends MusicBeatState
 			FlxG.camera.setFilters([new ShaderFilter(shader)]);
 		 */
 
-		eventHandler = new HScript();
 		exposure = new StringMap<Dynamic>();
 		exposure.set('name', null);
 		exposure.set('value1', null);
 		exposure.set('value2', null);
-		eventHandler.loadModule(Paths.hxs("hscripts/events"), exposure);
+		exposure.set('songName', curSong);
+
+		//old
+		//eventHandler = new HScript();
+		//eventHandler.loadModule(Paths.hxs("scripts/events"), exposure);
+
+		var dirs = FileSystem.readDirectory("assets/scripts");
+		for (file in dirs) {
+			if (file.endsWith(".hxs")) {
+				var handler = new HScript();
+				handler.loadModule(Paths.scripts(file), exposure);
+				handlers.push(handler);
+			}
+		}
 
 		if (Stage.stageHandler.exists("onCreatePost"))
 			Stage.stageHandler.get("onCreatePost")();
@@ -1237,14 +1250,15 @@ class PlayState extends MusicBeatState
 	{
 		try
 		{
-			if (eventHandler.exists("onEventFunction"))
-				eventHandler.get("onEventFunction")(name, value1, value2);
+			for (handler in handlers) {
+				handler.get("onEventFunction")(name, value1, value2);
+			}
 			if (Stage.stageHandler.exists("onEvent"))
 				Stage.stageHandler.get("onEvent")(name, value1, value2);
 		}
 		catch (e:Dynamic)
 		{
-			Application.current.window.alert("An error while triggering the event:\n" + e, "Script Error!");
+			Application.current.window.alert("An error while triggering the api:\n" + e, "Script Error!");
 		}
 	}
 

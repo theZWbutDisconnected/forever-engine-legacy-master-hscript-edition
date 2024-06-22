@@ -108,7 +108,7 @@ class UIStaticArrow extends FlxSprite
 		switch (numb)
 		{
 			case(-1):
-				stringSect = 'event';
+				stringSect = 'api';
 			case(0):
 				stringSect = 'purple';
 			case(1):

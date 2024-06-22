@@ -52,4 +52,13 @@ class ForeverTools
 			songsArray[i].destroy();
 		}
 	}
+
+	public static function anyScriptHasMethod(n:String, methods:Array<HScript>) {
+		var hasMethod:Bool = false;
+		for (handler in methods) {
+			if (handler.exists(n))
+				hasMethod = true;
+		}
+		return hasMethod;
+	}
 }

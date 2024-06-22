@@ -11,14 +11,14 @@ class ButtonEvent
 
 	#if FLX_SOUND_SYSTEM
 	/**
-	 * The sound to play when this event fires.
+	 * The sound to play when this api fires.
 	 */
 	public var sound:FlxSound;
 	#end
 
 	/**
 	 * @param   Callback   The callback function to call when this even fires.
-	 * @param   sound      The sound to play when this event fires.
+	 * @param   sound      The sound to play when this api fires.
 	 */
 	public function new(?Callback:Void->Void, ?sound:FlxSound)
 	{
@@ -42,7 +42,7 @@ class ButtonEvent
 	}
 
 	/**
-	 * Fires this event (calls the callback and plays the sound)
+	 * Fires this api (calls the callback and plays the sound)
 	 */
 	public inline function fire():Void
 	{

@@ -34,3 +34,7 @@ function returnEventDescription(name){
     }
     return '';
 }
+
+function returnEventsList(){
+    return ['Add Camera Zoom', 'Camera Bop Speed'];
+}
