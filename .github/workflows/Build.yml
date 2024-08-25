@@ -94,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: androidBuild
-          path: export/release/android/bin/app/build/outputs/apk/release/Forever Engine Legacy.apk
+          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
   WindowsRelease:
     runs-on: windows-latest
     steps:
