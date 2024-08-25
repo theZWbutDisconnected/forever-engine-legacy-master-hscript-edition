@@ -1,14 +1,14 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Build
 
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [main]
   pull_request:
-    branches: [ master ]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -16,42 +16,42 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  buildLinux:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  # buildLinux:
+  #   # The type of runner that the job will run on
+  #   runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+  #   # Steps represent a sequence of tasks that will be executed as part of the job
+  #   steps:
+  #     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+  #     - uses: actions/checkout@v2
 
-      - uses: krdlab/setup-haxe@master
-        with:
-          haxe-version: 4.2.5
-      # Runs a set of commands using the runners shell
-      - name: Install Haxelib
-        run: |
-          haxelib setup ~/haxelib
-          haxelib install hxcpp > /dev/null
-          haxelib install lime
-          haxelib install openfl
-          haxelib install flixel
-          haxelib install flixel-ui
-          haxelib run lime setup flixel
-          haxelib run lime setup
-          haxelib install flixel-tools
-          haxelib install flixel-addons
-          haxelib install hscript
-          haxelib git polymod https://github.com/larsiusprime/polymod.git
-          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
-          haxelib list
-      - name: Compile
-        run: haxelib run lime build Project.xml linux -release
-      - name: Publish Artifact
-        uses: actions/upload-artifact@v2.2.4
-        with:
-          name: linuxBuild
-          path: 'export/release/linux/bin'
+  #     - uses: krdlab/setup-haxe@master
+  #       with:
+  #         haxe-version: 4.3.6
+  #     # Runs a set of commands using the runners shell
+  #     - name: Install Haxelib
+  #       run: |
+  #         haxelib setup ~/haxelib
+  #         haxelib install hxcpp > /dev/null
+  #         haxelib install lime
+  #         haxelib install openfl
+  #         haxelib install flixel
+  #         haxelib install flixel-ui
+  #         haxelib run lime setup flixel
+  #         haxelib run lime setup
+  #         haxelib install flixel-tools
+  #         haxelib install flixel-addons
+  #         haxelib install hscript
+  #         haxelib git polymod https://github.com/larsiusprime/polymod.git
+  #         haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+  #         haxelib list
+  #     - name: Compile
+  #       run: haxelib run lime build Project.xml linux -release
+  #     - name: Publish Artifact
+  #       uses: actions/upload-artifact@v2.2.4
+  #       with:
+  #         name: linuxBuild
+  #         path: "export/release/linux/bin"
   buildWindows:
     runs-on: windows-latest
 
@@ -61,7 +61,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.5
+          haxe-version: 4.3.6
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -76,6 +76,8 @@ jobs:
           haxelib install flixel-tools
           haxelib install flixel-addons
           haxelib install hscript
+          haxelib install hxdiscord_rpc
+          haxelib install hxcpp-debug-server
           haxelib git polymod https://github.com/larsiusprime/polymod.git
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
           haxelib list
@@ -87,20 +89,20 @@ jobs:
         with:
           name: windowsBuild
           path: export/release/windows/bin
-  buildMac:
-    runs-on: macos-latest
+  buildWindowsDebug:
+    runs-on: windows-latest
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.0
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.2.5
+          haxe-version: 4.3.6
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
-          haxelib setup ~/haxelib
+          haxelib setup C:/haxelib
           haxelib install hxcpp > /dev/null
           haxelib install lime
           haxelib install openfl
@@ -111,13 +113,50 @@ jobs:
           haxelib install flixel-tools
           haxelib install flixel-addons
           haxelib install hscript
+          haxelib install hxdiscord_rpc
+          haxelib install hxcpp-debug-server
           haxelib git polymod https://github.com/larsiusprime/polymod.git
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
           haxelib list
+        shell: cmd
       - name: Compile
-        run: haxelib run lime build mac -release
+        run: haxelib run lime build windows -debug
       - name: Publish Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: macBuild
-          path: export/release/macos/bin
+          name: windowsBuildDebug
+          path: export/debug/windows/bin
+  # buildMac:
+  #   runs-on: macos-latest
+
+  #   steps:
+  #     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+  #     - uses: actions/checkout@v2
+
+  #     - uses: krdlab/setup-haxe@master
+  #       with:
+  #         haxe-version: 4.3.6
+  #     # Runs a set of commands using the runners shell
+  #     - name: Install Haxelib
+  #       run: |
+  #         haxelib setup ~/haxelib
+  #         haxelib install hxcpp > /dev/null
+  #         haxelib install lime
+  #         haxelib install openfl
+  #         haxelib install flixel
+  #         haxelib install flixel-ui
+  #         haxelib run lime setup flixel
+  #         haxelib run lime setup
+  #         haxelib install flixel-tools
+  #         haxelib install flixel-addons
+  #         haxelib install hscript
+  #         haxelib git polymod https://github.com/larsiusprime/polymod.git
+  #         haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
+  #         haxelib list
+  #     - name: Compile
+  #       run: haxelib run lime build mac -release
+  #     - name: Publish Artifact
+  #       uses: actions/upload-artifact@v2.2.4
+  #       with:
+  #         name: macBuild
+  #         path: export/release/macos/bin
