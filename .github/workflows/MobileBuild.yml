@@ -1,23 +1,60 @@
-name: Mobile + Release
-on: workflow_dispatch
+name: androidBuild
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  Mobile:
-    runs-on: ${{matrix.os}}
+  # This workflow contains a single job called "build"
+  buildAndroid:
+    name: buildAndroid
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14]
+        storage-type: [EXTERNAL]
     steps:
       - name: Checkout
         uses: actions/checkout@main
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@main
+        id: setup-ndk
+        with:
+          ndk-version: r21e
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@main
+        with:
+          distribution: "temurin"
+          java-version: "11"
 
       - name: Setup Haxe
         uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.6
 
+      - name: Restore Previous Cache
+        id: cache-debug-build-android-restore
+        uses: actions/cache/restore@main
+        with:
+          path: |
+            ~/haxelib
+            ~/.gradle
+            export/release/android/haxe
+            export/release/android/obj
+          key: cache-android-build
+
       - name: Install Libraries
         run: |
+          haxelib setup ~/haxelib
           haxelib git hxcpp https://github.com/mcagabe19-stuff/hxcpp --quiet
           haxelib git lime https://github.com/mcagabe19-stuff/lime --quiet
           haxelib install openfl 9.3.3 --quiet
@@ -39,72 +76,50 @@ jobs:
           haxelib git extension-androidtools https://github.com/MAJigsaw77/extension-androidtools 727693f0a76c6e396df675bb0ed95d7639a4db01 --quiet --skip-dependencies
 
       - name: Configure Android
-        if: startsWith(matrix.os, 'ubuntu')
         run: |
           haxelib run lime config ANDROID_SDK $ANDROID_HOME
-          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_LATEST_HOME
-          haxelib run lime config JAVA_HOME $JAVA_HOME_17_X64
+          haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_HOME
+          haxelib run lime config JAVA_HOME $JAVA_HOME
           haxelib run lime config ANDROID_SETUP true
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
-      - name: Compile (Android)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: haxelib run lime build android -D officialBuild
+      - name: Compile
+        run: haxelib run lime build android -D ${{ matrix.storage-type }} -final
+        env:
+          cert_pass: nullfunni
+          cert_alias_pass: nullfunni
 
-      - name: Compile (iOS)
-        if: startsWith(matrix.os, 'macos')
-        run: haxelib run lime build ios -nosign -D officialBuild
-
-      - name: Make Ipa And Zip For Release
-        if: startsWith(matrix.os, 'macos')
-        run: |
-          cd export/release/ios/build/*-iphoneos
-          mkdir Payload
-          mv *.app Payload
-          zip -r ForeverEngine.ipa Payload
-          zip ForeverEngine-iOS.zip ForeverEngine.ipa
-
-      - name: Upload Artifact (Android)
-        if: startsWith(matrix.os, 'ubuntu')
+      - name: Upload Artifact
         uses: actions/upload-artifact@main
         with:
           name: androidBuild
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-          if-no-files-found: error
 
-      - name: Upload Artifact (iOS)
-        if: startsWith(matrix.os, 'macos')
+  Windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.6
+
+      - name: Install Libraries
+        run: |
+          haxelib setup C:\haxelib
+          haxelib install hmm --quiet
+          haxelib run hmm install --quiet
+
+      - name: Compile
+        run: haxelib run lime build windows -final
+
+      - name: Upload Artifact
+        if: ${{ success() }}
         uses: actions/upload-artifact@main
         with:
-          name: iOSBuild
-          path: export/release/ios/build/Release-iphoneos/*.zip
+          name: windowsBuild
+          path: export\release\windows\bin\*
           if-no-files-found: error
-  Releaser:
-    needs: [Mobile]
-    runs-on: ubuntu-latest
-    permissions: write-all
-    steps:
-      - name: Download Android Build
-        uses: actions/download-artifact@main
-        with:
-          name: androidBuild
-          path: /home/runner
-
-      - name: Move Android File
-        run: mv /home/runner/ForeverEngine-release.apk /home/runner/ForeverEngine-Android.apk
-
-      - name: Download iOS Build
-        uses: actions/download-artifact@main
-        with:
-          name: iOSBuild
-          path: /home/runner
-
-      - name: Publish The Release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: true
-          automatic_release_tag: "1.0-prerelease"
-          title: "1.0 (Prerelease)"
-          files: |
-            /home/runner/*.apk
-            /home/runner/*.zip
