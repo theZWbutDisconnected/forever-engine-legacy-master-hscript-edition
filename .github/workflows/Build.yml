@@ -1,4 +1,4 @@
-name: androidBuild
+name: Build - Windows + Android
 
 # Controls when the action will run.
 on:
@@ -96,7 +96,7 @@ jobs:
           name: androidBuild
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
 
-  Windows:
+  Windows Release:
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -110,8 +110,20 @@ jobs:
       - name: Install Libraries
         run: |
           haxelib setup C:\haxelib
-          haxelib install hmm --quiet
-          haxelib run hmm install --quiet
+          haxelib install hxcpp > /dev/null
+          haxelib install lime 8.1.2 --quiet
+          haxelib install openfl 9.3.3 --quiet
+          haxelib install flixel 5.6.1 --quiet
+          haxelib install flixel-ui 2.6.1 --quiet
+          haxelib run lime setup flixel
+          haxelib run lime setup
+          haxelib install flixel-tools 1.5.1 --quiet
+          haxelib install flixel-addons 3.2.2 --quiet
+          haxelib install hscript 2.4.0 --quiet
+          haxelib install hxdiscord_rpc 1.1.1 --quiet
+          haxelib install hxcpp-debug-server 1.2.4 --quiet
+          haxelib git polymod https://github.com/larsiusprime/polymod.git --quiet
+          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc --quiet
 
       - name: Compile
         run: haxelib run lime build windows -final
@@ -122,4 +134,43 @@ jobs:
         with:
           name: windowsBuild
           path: export\release\windows\bin\*
+          if-no-files-found: error
+  Windows Debug:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: 4.3.6
+
+      - name: Install Libraries
+        run: |
+          haxelib setup C:\haxelib
+          haxelib install hxcpp > /dev/null
+          haxelib install lime 8.1.2 --quiet
+          haxelib install openfl 9.3.3 --quiet
+          haxelib install flixel 5.6.1 --quiet
+          haxelib install flixel-ui 2.6.1 --quiet
+          haxelib run lime setup flixel
+          haxelib run lime setup
+          haxelib install flixel-tools 1.5.1 --quiet
+          haxelib install flixel-addons 3.2.2 --quiet
+          haxelib install hscript 2.4.0 --quiet
+          haxelib install hxdiscord_rpc 1.1.1 --quiet
+          haxelib install hxcpp-debug-server 1.2.4 --quiet
+          haxelib git polymod https://github.com/larsiusprime/polymod.git --quiet
+          haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc --quiet
+
+      - name: Compile
+        run: haxelib run lime build windows -debug
+
+      - name: Upload Artifact
+        if: ${{ success() }}
+        uses: actions/upload-artifact@main
+        with:
+          name: windowsBuild
+          path: export\debug\windows\bin\*
           if-no-files-found: error
