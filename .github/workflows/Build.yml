@@ -94,7 +94,7 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: androidBuild
-          path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+          path: export/release/android/bin/app/build/outputs/apk/release/Forever Engine Legacy.apk
   WindowsRelease:
     runs-on: windows-latest
     steps:
@@ -170,6 +170,6 @@ jobs:
         if: ${{ success() }}
         uses: actions/upload-artifact@main
         with:
-          name: windowsBuild
+          name: windowsDebug
           path: export\debug\windows\bin\*
           if-no-files-found: error
