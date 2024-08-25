@@ -60,8 +60,8 @@ jobs:
           cd export/release/ios/build/*-iphoneos
           mkdir Payload
           mv *.app Payload
-          zip -r PsychEngine.ipa Payload
-          zip PsychEngine-iOS.zip PsychEngine.ipa
+          zip -r ForeverEngine.ipa Payload
+          zip ForeverEngine-iOS.zip ForeverEngine.ipa
 
       - name: Upload Artifact (Android)
         if: startsWith(matrix.os, 'ubuntu')
@@ -86,17 +86,17 @@ jobs:
       - name: Download Android Build
         uses: actions/download-artifact@main
         with:
-           name: androidBuild
-           path: /home/runner
+          name: androidBuild
+          path: /home/runner
 
       - name: Move Android File
-        run: mv /home/runner/PsychEngine-release.apk /home/runner/PsychEngine-Android.apk
+        run: mv /home/runner/ForeverEngine-release.apk /home/runner/ForeverEngine-Android.apk
 
       - name: Download iOS Build
         uses: actions/download-artifact@main
         with:
-           name: iOSBuild
-           path: /home/runner
+          name: iOSBuild
+          path: /home/runner
 
       - name: Publish The Release
         uses: marvinpinto/action-automatic-releases@latest
