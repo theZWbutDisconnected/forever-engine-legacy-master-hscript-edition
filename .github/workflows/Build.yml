@@ -95,8 +95,7 @@ jobs:
         with:
           name: androidBuild
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
-
-  Windows Release:
+  WindowsRelease:
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -135,7 +134,7 @@ jobs:
           name: windowsBuild
           path: export\release\windows\bin\*
           if-no-files-found: error
-  Windows Debug:
+  WindowsDebug:
     runs-on: windows-latest
     steps:
       - name: Checkout
