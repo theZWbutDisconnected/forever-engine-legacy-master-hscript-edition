@@ -68,7 +68,7 @@ class StoryMenuState extends MusicBeatState
 
 		var dirs = FileSystem.readDirectory("assets/scripts");
 		for (file in dirs) {
-			if (file.endsWith(".hxs")) {
+			if (file.endsWith(".hx")) {
 				var handler = new HScript();
 				handler.loadModule(Paths.scripts(file), exposure);
 				handlers.push(handler);

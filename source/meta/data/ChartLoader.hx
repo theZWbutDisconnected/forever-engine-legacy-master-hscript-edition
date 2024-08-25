@@ -10,6 +10,7 @@ import meta.data.Section.SwagSection;
 import meta.data.Song.SwagSong;
 import meta.state.PlayState;
 import meta.state.charting.ChartingState;
+import flixel.group.FlxGroup.FlxTypedGroup;
 
 /**
 	This is the chartloader class. it loads in charts, but also exports charts, the chart parameters are based on the type of chart, 

@@ -291,7 +291,7 @@ class Paths
 
 	inline static public function hxs(key:String, ?library:String)
 	{
-		return getPath('$key.hxs', TEXT, library);
+		return getPath('$key.hx', TEXT, library);
 	}
 
 	inline static public function scripts(key:String)

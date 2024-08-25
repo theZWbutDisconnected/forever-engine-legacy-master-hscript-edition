@@ -37,9 +37,9 @@ import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
+import sys.FileSystem;
 import sys.io.File;
 
-import sys.FileSystem;
 using StringTools;
 
 /**
@@ -104,8 +104,8 @@ class OriginalChartingState extends MusicBeatState
 	var playTicksBf:FlxUICheckBox = null;
 	var playTicksDad:FlxUICheckBox = null;
 
-	public static var exposure:StringMap<Dynamic>;
-	public static var handlers:Array<HScript> = [];
+	var exposure:StringMap<Dynamic>;
+	var handlers:Array<HScript> = [];
 
 	override function create()
 	{
@@ -119,7 +119,7 @@ class OriginalChartingState extends MusicBeatState
 
 		var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + GRID_SIZE).makeGraphic(2, Std.int(gridBG.height), FlxColor.BLACK);
 		add(gridBlackLine);
-		
+
 		var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + gridBG.width / 2 + GRID_SIZE / 2).makeGraphic(2, Std.int(gridBG.height), FlxColor.BLACK);
 		add(gridBlackLine);
 
@@ -203,8 +203,10 @@ class OriginalChartingState extends MusicBeatState
 		exposure.set('value2', null);
 
 		var dirs = FileSystem.readDirectory("assets/scripts");
-		for (file in dirs) {
-			if (file.endsWith(".hxs")) {
+		for (file in dirs)
+		{
+			if (file.endsWith(".hx"))
+			{
 				var handler = new HScript();
 				handler.loadModule(Paths.scripts(file), exposure);
 				handlers.push(handler);
@@ -232,18 +234,20 @@ class OriginalChartingState extends MusicBeatState
 
 		var text:FlxText = new FlxText(20, 30, 0, "Event:");
 		tab_group_event.add(text);
-		
+
 		descText = new FlxText(20, 200, 0, '');
 
 		var events:Array<String> = [];
-		for (handler in handlers) {
+		for (handler in handlers)
+		{
 			if (handler.exists("returnEventsList"))
-				events = handler.get("returnEventsList")(eventName);
+				events = handler.get("returnEventsList")();
 		}
 
 		eventName = events[0];
 
-		for (handler in handlers) {
+		for (handler in handlers)
+		{
 			if (handler.exists("returnEventDescription"))
 				descText.text = handler.get("returnEventDescription")(eventName);
 		}
@@ -251,7 +255,8 @@ class OriginalChartingState extends MusicBeatState
 		var eventDropDown = new FlxUIDropDownMenu(20, 50, FlxUIDropDownMenu.makeStrIdLabelArray(events, true), function(event:String)
 		{
 			eventName = events[Std.parseInt(event)];
-			for (handler in handlers) {
+			for (handler in handlers)
+			{
 				if (handler.exists("returnEventDescription"))
 					descText.text = handler.get("returnEventDescription")(eventName);
 			}
@@ -274,7 +279,7 @@ class OriginalChartingState extends MusicBeatState
 		tab_group_event.add(eventDropDown);
 
 		tab_group_event.add(descText);
-		
+
 		UI_box.addGroup(tab_group_event);
 	}
 
@@ -374,11 +379,11 @@ class OriginalChartingState extends MusicBeatState
 
 		var stageDropDown:Array<String> = CoolUtil.returnAssetsLibrary('UI/default');
 
-		var stageDropDown = new FlxUIDropDownMenu(player1DropDown.x, player1DropDown.y + 40,
-		FlxUIDropDownMenu.makeStrIdLabelArray(stages, true),function(stage:String)
-		{
-			_song.stage = stages[Std.parseInt(stage)];
-		});
+		var stageDropDown = new FlxUIDropDownMenu(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(stages, true),
+			function(stage:String)
+			{
+				_song.stage = stages[Std.parseInt(stage)];
+			});
 		stageDropDown.selectedLabel = _song.stage;
 
 		playTicksBf = new FlxUICheckBox(check_mute_inst.x, check_mute_inst.y + 25, null, null, 'Play Hitsounds (Boyfriend - in editor)', 100);
@@ -792,11 +797,11 @@ class OriginalChartingState extends MusicBeatState
 			}
 
 			/*if (FlxG.keys.justPressed.R)
-			{
-				if (FlxG.keys.pressed.SHIFT)
-					resetSection(true);
-				else
-					resetSection();
+				{
+					if (FlxG.keys.pressed.SHIFT)
+						resetSection(true);
+					else
+						resetSection();
 			}*/
 
 			if (FlxG.mouse.wheel != 0)
@@ -881,7 +886,7 @@ class OriginalChartingState extends MusicBeatState
 	{
 		if (curSelectedNote != null)
 		{
-			if (curSelectedNote[2] != null && !Std.isOfType(curSelectedNote[2],String))
+			if (curSelectedNote[2] != null && !Std.isOfType(curSelectedNote[2], String))
 			{
 				curSelectedNote[2] += value;
 				curSelectedNote[2] = Math.max(curSelectedNote[2], 0);
@@ -1086,10 +1091,10 @@ class OriginalChartingState extends MusicBeatState
 				note.mustPress = !note.mustPress;
 
 			curRenderedNotes.add(note);
-			
+
 			if (daNoteInfo == -1)
 			{
-				noteEventName = new FlxText(note.x - GRID_SIZE / 2, note.y - 0, 720, "api.Event: " + i[2]);
+				noteEventName = new FlxText(note.x - GRID_SIZE / 2, note.y - 0, 720, "Event: " + i[2]);
 				noteEventName.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				noteEventName.x -= noteEventName.width;
 				noteEventValue1 = new FlxText(note.x - GRID_SIZE / 2, note.y + 12, 720, "Value1: " + i[3]);

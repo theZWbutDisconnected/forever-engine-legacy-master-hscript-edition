@@ -1,5 +1,6 @@
 package;
 
+import event.EventRegistry;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxGame;
@@ -9,6 +10,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxColor;
 import haxe.CallStack.StackItem;
 import haxe.CallStack;
+import haxe.ds.StringMap;
 import haxe.io.Path;
 import lime.app.Application;
 import meta.*;
@@ -26,7 +28,6 @@ import openfl.events.UncaughtErrorEvent;
 import sys.FileSystem;
 import sys.io.File;
 import sys.io.Process;
-import event.EventRegistry;
 
 // Here we actually import the states and metadata, and just the metadata.
 // It's nice to have modularity so that we don't have ALL elements loaded at the same time.
@@ -56,8 +57,9 @@ class Main extends Sprite
 		Enough of that, here's how it works
 		[ [songs to use], [characters in songs], [color of week], name of week ]
 	**/
-	public static var songListHandler:HScript;
-	public static var gameWeeks:Array<Dynamic> = [];
+	var songsHandler:HScript;
+
+	public static var gameWeeks:Array<Array<Dynamic>>;
 
 	// most of these variables are just from the base game!
 	// be sure to mess around with these if you'd like.
@@ -71,10 +73,11 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-		songListHandler = new HScript();
-		songListHandler.loadModule(Paths.hxs('songs/songList'));
-		if (songListHandler.exists("returnSongList"))
-			gameWeeks = songListHandler.get("returnSongList")();
+		songsHandler = new HScript();
+		songsHandler.loadModule(Paths.hxs('songs/songList'));
+		trace(songsHandler.get("returnSongs")());
+		if (songsHandler.exists("returnSongs"))
+			gameWeeks = songsHandler.get("returnSongs")();
 
 		/**
 			ok so, haxe html5 CANNOT do 120 fps. it just cannot.
@@ -111,7 +114,7 @@ class Main extends Sprite
 
 		// here we set up the base game
 		var gameCreate:FlxGame;
-		gameCreate = new FlxGame(gameWidth, gameHeight, mainClassState, zoom, framerate, framerate, skipSplash);
+		gameCreate = new FlxGame(gameWidth, gameHeight, mainClassState, framerate, framerate, skipSplash);
 		addChild(gameCreate); // and create it afterwards
 
 		// default game FPS settings, I'll probably comment over them later.
@@ -119,7 +122,7 @@ class Main extends Sprite
 
 		// begin the discord rich presence
 		#if DISCORD_RPC
-		Discord.initializeRPC();
+		Discord.initialize();
 		Discord.changePresence('');
 		#end
 

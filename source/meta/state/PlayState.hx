@@ -50,14 +50,15 @@ import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
 import openfl.media.Sound;
 import openfl.utils.Assets;
+import sys.FileSystem;
 import sys.io.File;
 
-import sys.FileSystem;
 using StringTools;
 
 #if desktop
 import meta.data.dependency.Discord;
 #end
+
 class PlayState extends MusicBeatState
 {
 	public static var startTimer:FlxTimer;
@@ -184,6 +185,7 @@ class PlayState extends MusicBeatState
 	public static var handlers:Array<HScript> = [];
 
 	public static var exposure:StringMap<Dynamic>;
+
 	// at the beginning of the playstate
 	override public function create()
 	{
@@ -357,7 +359,7 @@ class PlayState extends MusicBeatState
 			strumHUD[i] = new FlxCamera();
 			strumHUD[i].bgColor.alpha = 0;
 
-			strumHUD[i].cameras = [camHUD];
+			// strumHUD[i].cameras = [camHUD];
 			allUIs.push(strumHUD[i]);
 			FlxG.cameras.add(strumHUD[i]);
 			// set this strumline's camera to the designated camera
@@ -441,13 +443,15 @@ class PlayState extends MusicBeatState
 		exposure.set('value2', null);
 		exposure.set('songName', curSong);
 
-		//old
-		//eventHandler = new HScript();
-		//eventHandler.loadModule(Paths.hxs("scripts/events"), exposure);
+		// old
+		// eventHandler = new HScript();
+		// eventHandler.loadModule(Paths.hxs("scripts/events"), exposure);
 
 		var dirs = FileSystem.readDirectory("assets/scripts");
-		for (file in dirs) {
-			if (file.endsWith(".hxs")) {
+		for (file in dirs)
+		{
+			if (file.endsWith(".hxs"))
+			{
 				var handler = new HScript();
 				handler.loadModule(Paths.scripts(file), exposure);
 				handlers.push(handler);
@@ -596,6 +600,7 @@ class PlayState extends MusicBeatState
 	var lastSection:Int = 0;
 
 	var botplayAlpha:Float = 0;
+
 	public var botplaySine:Float = 0;
 
 	override public function update(elapsed:Float)
@@ -716,8 +721,7 @@ class PlayState extends MusicBeatState
 					var getCenterX = char.getMidpoint().x + 100;
 					var getCenterY = char.getMidpoint().y - 100;
 
-					camFollow.setPosition(getCenterX + camDisplaceX + char.characterData.camOffsetX,
-						getCenterY + camDisplaceY + char.characterData.camOffsetY);
+					camFollow.setPosition(getCenterX + camDisplaceX + char.characterData.camOffsetX, getCenterY + camDisplaceY + char.characterData.camOffsetY);
 
 					if (char.curCharacter == 'mom')
 						vocals.volume = 1;
@@ -743,8 +747,7 @@ class PlayState extends MusicBeatState
 							getCenterY = char.getMidpoint().y - 200;
 					}
 
-					camFollow.setPosition(getCenterX + camDisplaceX - char.characterData.camOffsetX,
-						getCenterY + camDisplaceY + char.characterData.camOffsetY);
+					camFollow.setPosition(getCenterX + camDisplaceX - char.characterData.camOffsetX, getCenterY + camDisplaceY + char.characterData.camOffsetY);
 				}
 			}
 
@@ -759,7 +762,7 @@ class PlayState extends MusicBeatState
 				for (hud in allUIs)
 					hud.zoom = FlxMath.lerp(1 + forceZoom[1], hud.zoom, easeLerp);
 			}
-			
+
 			// not even forcezoom anymore but still
 			FlxG.camera.angle = FlxMath.lerp(0 + forceZoom[2], FlxG.camera.angle, easeLerp);
 			for (hud in allUIs)
@@ -768,10 +771,10 @@ class PlayState extends MusicBeatState
 			// Controls
 
 			// RESET = Quick Game Over Screen
-			if (controls.RESET && !startingSong && !isStoryMode)
-			{
-				health = 0;
-			}
+			// if (controls.RESET && !startingSong && !isStoryMode)
+			// {
+			// 	health = 0;
+			// }
 
 			if (health <= 0 && startedCountdown)
 			{
@@ -798,7 +801,8 @@ class PlayState extends MusicBeatState
 			{
 				var dunceNote:Note = unspawnNotes[0];
 				// push note to its correct strumline
-				strumLines.members[(Math.floor(dunceNote.noteData) == -1) ? 0 : Math.floor((dunceNote.noteData + (dunceNote.mustPress ? 4 : 0)) / numberOfKeys)].push(dunceNote);
+				strumLines.members[(Math.floor(dunceNote.noteData) == -1) ? 0 : Math.floor((dunceNote.noteData +
+					(dunceNote.mustPress ? 4 : 0)) / numberOfKeys)].push(dunceNote);
 				unspawnNotes.splice(unspawnNotes.indexOf(dunceNote), 1);
 			}
 
@@ -936,7 +940,8 @@ class PlayState extends MusicBeatState
 				strumline.allNotes.forEachAlive(function(daNote:Note)
 				{
 					var roundedSpeed = FlxMath.roundDecimal(daNote.noteSpeed, 2);
-					var receptorPosY:Float = strumline.receptors.members[(Math.floor(daNote.noteData) == -1) ? 0 : Math.floor(daNote.noteData)].y + Note.swagWidth / 6;
+					var receptorPosY:Float = strumline.receptors.members[(Math.floor(daNote.noteData) == -1) ? 0 : Math.floor(daNote.noteData)].y
+						+ Note.swagWidth / 6;
 					var psuedoY:Float = (downscrollMultiplier * -((Conductor.songPosition - daNote.strumTime) * (0.45 * roundedSpeed)));
 					var psuedoX = 25 + daNote.noteVisualOffset;
 
@@ -1013,7 +1018,7 @@ class PlayState extends MusicBeatState
 					else
 					{
 						if (daNote.noteData > -1)
-					    	daNote.visible = true;
+							daNote.visible = true;
 						daNote.active = true;
 					}
 
@@ -1082,7 +1087,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function destroyNote(strumline:Strumline, daNote:Note)
-	{	
+	{
 		daNote.active = false;
 		daNote.exists = false;
 
@@ -1105,7 +1110,8 @@ class PlayState extends MusicBeatState
 
 			if (character == boyfriend)
 			{
-				for (curChar in boyfriendStrumSingCharacters){
+				for (curChar in boyfriendStrumSingCharacters)
+				{
 					characterPlayAnimation(coolNote, curChar);
 				}
 			}
@@ -1250,7 +1256,8 @@ class PlayState extends MusicBeatState
 	{
 		try
 		{
-			for (handler in handlers) {
+			for (handler in handlers)
+			{
 				handler.get("onEventFunction")(name, value1, value2);
 			}
 			if (Stage.stageHandler.exists("onEvent"))
@@ -1708,10 +1715,11 @@ class PlayState extends MusicBeatState
 			&& (curBeat % 2 == 0 || dadOpponent.characterData.quickDancer))
 			dadOpponent.dance();
 	}
-	
+
 	public var bopIntensity:Float = 1;
 	public var bopFrequency:Float = 1;
 	public var camZooming:Bool = true;
+
 	override function beatHit()
 	{
 		super.beatHit();

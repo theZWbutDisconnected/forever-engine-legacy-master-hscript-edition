@@ -1,5 +1,8 @@
 package meta.state.menus;
 
+import event.events.MenuCreateEvent;
+import event.events.MenuUpdateEvent;
+import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -11,16 +14,13 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import haxe.ds.StringMap;
 import meta.MusicBeat.MusicBeatState;
-import meta.data.dependency.Discord;
-
-import event.events.MenuCreateEvent;
-import event.events.MenuUpdateEvent;
+import meta.data.AudioDisplay;
 import meta.data.HScript;
+import meta.data.dependency.Discord;
 import sys.FileSystem;
 
-import haxe.ds.StringMap;
-import flixel.FlxBasic;
 using StringTools;
 
 /**
@@ -60,8 +60,10 @@ class MainMenuState extends MusicBeatState
 		exposure.set('remove', remove);
 
 		var dirs = FileSystem.readDirectory("assets/scripts");
-		for (file in dirs) {
-			if (file.endsWith(".hxs")) {
+		for (file in dirs)
+		{
+			if (file.endsWith(".hx"))
+			{
 				var handler = new HScript();
 				handler.loadModule(Paths.scripts(file), exposure);
 				handlers.push(handler);
@@ -114,7 +116,8 @@ class MainMenuState extends MusicBeatState
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 
-		if (Main.EVENT_BUS.triggerToMethod(new MenuCreateEvent("mainmenu"), this, "onMenuCreateEvent", handlers)) {
+		if (Main.EVENT_BUS.triggerToMethod(new MenuCreateEvent("mainmenu"), this, "onMenuCreateEvent", handlers))
+		{
 			add(bg);
 
 			add(magenta);
@@ -127,7 +130,8 @@ class MainMenuState extends MusicBeatState
 			var tex = Paths.getSparrowAtlas('menus/base/title/FNF_main_menu_assets');
 
 			// loop through the menu options
-			for (i in 0...optionShit.length) {
+			for (i in 0...optionShit.length)
+			{
 				var menuItem:FlxSprite = new FlxSprite(0, 80 + (i * 200));
 				menuItem.frames = tex;
 				// add the animations in a cool way (real
@@ -154,20 +158,21 @@ class MainMenuState extends MusicBeatState
 				menuItem.updateHitbox();
 
 				/*
-				FlxTween.tween(menuItem, {alpha: 1, x: ((FlxG.width / 2) - (menuItem.width / 2))}, 0.35, {
-					ease: FlxEase.smootherStepInOut,
-					onComplete: function(tween:FlxTween)
-					{
-						canSnap[i] = 0;
-					}
-			    });*/
+					FlxTween.tween(menuItem, {alpha: 1, x: ((FlxG.width / 2) - (menuItem.width / 2))}, 0.35, {
+						ease: FlxEase.smootherStepInOut,
+						onComplete: function(tween:FlxTween)
+						{
+							canSnap[i] = 0;
+						}
+				});*/
 			}
 
 			updateSelection();
 		}
 		add(versionShit);
 
-		for (handler in handlers) {
+		for (handler in handlers)
+		{
 			handler.get("onMenuCreatePost")("mainmenu");
 		}
 
@@ -184,7 +189,8 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (Main.EVENT_BUS.triggerToMethod(new MenuUpdateEvent("mainmenu").setElapsed(elapsed), this, "onMenuUpdateEvent", handlers)) {
+		if (Main.EVENT_BUS.triggerToMethod(new MenuUpdateEvent("mainmenu").setElapsed(elapsed), this, "onMenuUpdateEvent", handlers))
+		{
 			// colorTest += 0.125;
 			// bg.color = FlxColor.fromHSB(colorTest, 100, 100, 0.5);
 
@@ -214,25 +220,25 @@ class MainMenuState extends MusicBeatState
 							FlxG.sound.play(Paths.sound('scrollMenu'));
 						}
 						/* idk something about it isn't working yet I'll rewrite it later
-						else
-						{
-							// paaaaaaaiiiiiiiinnnn
-							var curDir:Int = 0;
-							if (i == 0)
-								curDir = -1;
-							else if (i == 1)
-								curDir = 1;
-
-							if (counterControl < 2)
-								counterControl += 0.05;
-
-							if (counterControl >= 1)
+							else
 							{
-								curSelected += (curDir * (counterControl / 24));
-								if (curSelected % 1 == 0)
-									FlxG.sound.play(Paths.sound('scrollMenu'));
-							}
-					}*/
+								// paaaaaaaiiiiiiiinnnn
+								var curDir:Int = 0;
+								if (i == 0)
+									curDir = -1;
+								else if (i == 1)
+									curDir = 1;
+
+								if (counterControl < 2)
+									counterControl += 0.05;
+
+								if (counterControl >= 1)
+								{
+									curSelected += (curDir * (counterControl / 24));
+									if (curSelected % 1 == 0)
+										FlxG.sound.play(Paths.sound('scrollMenu'));
+								}
+						}*/
 
 						if (curSelected < 0)
 							curSelected = optionShit.length - 1;
@@ -294,7 +300,8 @@ class MainMenuState extends MusicBeatState
 				updateSelection();
 		}
 
-		for (handler in handlers) {
+		for (handler in handlers)
+		{
 			handler.get("onMenuUpdatePost")(elapsed, "mainmenu");
 		}
 
@@ -318,9 +325,10 @@ class MainMenuState extends MusicBeatState
 		});
 
 		// set the sprites and all of the current selection
-		if (menuItems.members[Math.floor(curSelected)] != null) {
+		if (menuItems.members[Math.floor(curSelected)] != null)
+		{
 			camFollow.setPosition(menuItems.members[Math.floor(curSelected)].getGraphicMidpoint().x,
-			menuItems.members[Math.floor(curSelected)].getGraphicMidpoint().y);
+				menuItems.members[Math.floor(curSelected)].getGraphicMidpoint().y);
 
 			if (menuItems.members[Math.floor(curSelected)].animation.curAnim.name == 'idle')
 				menuItems.members[Math.floor(curSelected)].animation.play('selected');
@@ -331,7 +339,8 @@ class MainMenuState extends MusicBeatState
 		lastCurSelected = Math.floor(curSelected);
 	}
 
-	override function add(obj:FlxBasic):FlxBasic {
+	override function add(obj:FlxBasic):FlxBasic
+	{
 		if (Reflect.hasField(obj, "antialiasing"))
 			Reflect.setField(obj, "antialiasing", Init.gameSettings.get("Disable Antialiasing"));
 		return super.add(obj);

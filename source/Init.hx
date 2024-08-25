@@ -265,7 +265,7 @@ class Init extends FlxState
 		if (trueSettings.get("Custom Titlescreen"))
 			Main.switchState(this, new CustomTitlescreen());
 		else
-			Main.switchState(this, new TitleState());
+			Main.switchState(this, new meta.state.AudioDisplayState());
 	}
 
 	public static function loadSettings():Void

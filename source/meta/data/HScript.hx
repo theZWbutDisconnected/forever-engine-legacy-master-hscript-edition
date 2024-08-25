@@ -15,6 +15,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.util.RealColor;
 // import flxanimate.FlxAnimate;
 import gameObjects.Boyfriend;
 import gameObjects.Character;
@@ -23,6 +24,8 @@ import gameObjects.background.*;
 import gameObjects.userInterface.HealthIcon;
 import gameObjects.userInterface.notes.Note;
 import gameObjects.userInterface.notes.Strumline;
+import haxe.Exception;
+import haxe.Log;
 import haxe.ds.StringMap;
 import hscript.Expr;
 import hscript.Interp;
@@ -36,7 +39,6 @@ import lime.ui.KeyModifier;
 import lime.ui.MouseButton;
 import lime.ui.Window;
 import meta.data.dependency.FNFSprite;
-import meta.data.dependency.RealColor;
 import meta.state.PlayState;
 import openfl.display.GraphicsShader;
 import openfl.display.Shader;
@@ -51,12 +53,11 @@ import sys.io.File;
 import sys.io.Process;
 
 using StringTools;
+
 #if lime
 import lime.app.Application as LimeApplication;
 import lime.ui.WindowAttributes;
 #end
-
-
 
 class HScript
 {
@@ -66,128 +67,173 @@ class HScript
 
 	public function new()
 	{
-		// Classes (Haxe)
-		interp.variables.set("Sys", Sys);
-		interp.variables.set("Std", Std);
-		interp.variables.set("Math", Math);
-		interp.variables.set("StringTools", StringTools);
-		interp.variables.set("FileSystem", FileSystem);
-		interp.variables.set("Lib", openfl.Lib);
-		interp.variables.set("Application", Application);
-		interp.variables.set("Assets", Assets);
-
-		// Classes (Flixel)
-		interp.variables.set("FlxG", FlxG);
-		interp.variables.set("FlxSprite", FlxSprite);
-		//interp.variables.set("FlxAnimate", FlxAnimate);
-		interp.variables.set("FlxCamera", FlxCamera);
-		interp.variables.set("FlxMath", FlxMath);
-		interp.variables.set("FlxPoint", FlxPoint);
-		interp.variables.set("FlxRect", FlxRect);
-		interp.variables.set("FlxTween", FlxTween);
-		interp.variables.set("FlxTimer", FlxTimer);
-		interp.variables.set("FlxEase", FlxEase);
-		interp.variables.set("FlxAtlasFrames", FlxAtlasFrames);
-		interp.variables.set("Shader", Shader);
-		interp.variables.set("ShaderFilter", ShaderFilter);
-		interp.variables.set("GraphicsShader", GraphicsShader);
-		interp.variables.set("FlxGraphicsShader", FlxGraphicsShader);
-		interp.variables.set("FlxColor", RealColor); // lol
-		interp.variables.set("FlxGroup", FlxGroup);
-		interp.variables.set("FlxGraphic", FlxGraphic);
-		interp.variables.set("FlxTransWindow", flixel.FlxTransWindow);
-
-		// Classes (Forever)
-		interp.variables.set("Init", Init);
-		interp.variables.set("Paths", Paths);
-		interp.variables.set("Note", Note);
-		interp.variables.set("Strumline", Strumline);
-		interp.variables.set("Conductor", Conductor);
-		interp.variables.set("UIStaticArrow", UIStaticArrow);
-		interp.variables.set("Character", Character.instance);
-		interp.variables.set("BackgroundGirls", BackgroundGirls);
-		interp.variables.set("BackgroundDancer", BackgroundDancer);
-		interp.variables.set("Boyfriend", Boyfriend);
-		interp.variables.set("FNFSprite", FNFSprite);
-		interp.variables.set("HealthIcon", HealthIcon);
-		interp.variables.set("PlayState", PlayState);
-		interp.variables.set("Stage", Stage.instance);
-		interp.variables.set("Game", PlayState.instance);
-		interp.variables.set("File", File);
-
-		interp.variables.set("trace", LogUtils.log);
+		interp.variables.set("FlxColor", RealColor);
+		interp.variables.set("trace", Log.trace);
 
 		parser.allowTypes = true;
 		parser.allowJSON = true;
 		parser.allowMetadata = true;
 	}
 
-	public function loadModule(path:String, ?params:StringMap<Dynamic>) {
+	public function loadModule(path:String, ?params:StringMap<Dynamic>)
+	{
 		// interp.expr(parser.parseString(code));
 		if (params != null)
 		{
-	    	for (i in params.keys())
-	    	{
-	    		interp.variables.set(i, params.get(i));
-	    	}
-	    }
+			for (i in params.keys())
+			{
+				interp.variables.set(i, params.get(i));
+			}
+		}
+
+		var handlerMethods = File.getContent(path);
+		// handlerMethods = Preprocessor.preprocess(handlerMethods);
 
 		// importing!!
-
-		interp.variables.set("import", function(className:String)
+		var imports = extractImports(handlerMethods);
+		var classes:Array<String> = [];
+		if (imports != null)
 		{
-			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
-			// i would LIKE to do like.. flixel.util.* but idk if I can get everything in a namespace
-			var classSplit:Array<String> = className.split(".");
-			var daClassName = classSplit[classSplit.length - 1]; // last one
-			if (daClassName == '*')
+			for (importLine in imports)
 			{
-				var daClass = Type.resolveClass(className);
-				while (classSplit.length > 0 && daClass == null)
-				{
-					daClassName = classSplit.pop();
-					daClass = Type.resolveClass(classSplit.join("."));
-					if (daClass != null)
-						break;
-				}
+				var moduleName = getModuleName(importLine);
+				classes.push(moduleName);
+				importClass(moduleName);
+				handlerMethods = handlerMethods.replace(importLine, "");
+			}
+			trace("Import Classes: " + classes);
+		}
+		trace('[Script] ' + handlerMethods);
+		interp.execute(parser.parseString(handlerMethods, path));
+	}
+
+	function extractImports(script:String):Array<String>
+	{
+		var importLines = [];
+		var lines = script.split("\n");
+		for (line in lines)
+		{
+			if (line.trim().startsWith("import"))
+			{
+				var s = line.trim();
+				importLines.push(s + check(s));
+			}
+		}
+		return importLines;
+	}
+
+	function check(v:String):String
+	{
+		if (!v.endsWith(';'))
+		{
+			FlxG.log.warn('Missing ;');
+			throw("Missing ;");
+			return ';';
+		}
+		return '';
+	}
+
+	function getModuleName(importLine:String):String
+	{
+		return importLine.replace("import ", "").replace(";", "");
+	}
+
+	function importClass(className:String)
+	{
+		// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
+		// i would LIKE to do like.. flixel.util.* but idk if I can get everything in a namespace
+		var classSplit:Array<String> = className.split(".");
+		var daClassName = classSplit[classSplit.length - 1]; // last one
+		if (daClassName == '*')
+		{
+			var daClass = Type.resolveClass(className);
+			while (classSplit.length > 0 && daClass == null)
+			{
+				daClassName = classSplit.pop();
+				daClass = Type.resolveClass(classSplit.join("."));
 				if (daClass != null)
+					break;
+			}
+			if (daClass != null)
+			{
+				for (field in Reflect.fields(daClass))
 				{
-					for (field in Reflect.fields(daClass))
-					{
-						interp.variables.set(field, Reflect.field(daClass, field));
-					}
-				}
-				else
-				{
-					FlxG.log.error('Could not import class ${daClass}');
-					trace('Could not import class ${daClass}');
+					interp.variables.set(field, Reflect.field(daClass, field));
 				}
 			}
 			else
 			{
-				var daClass = Type.resolveClass(className);
-				if (daClass == null)
-				{
-					FlxG.log.error('Could not import class ${daClass}');
-					trace('Could not import class ${daClass}');
-					return;
-				}
-				interp.variables.set(daClassName, daClass);
+				trace('Could not import class ${daClass}');
 			}
-		});
-		interp.execute(parser.parseString(File.getContent(path),path));
+		}
+		else
+		{
+			var daClass = Type.resolveClass(className);
+			if (daClass == null)
+			{
+				trace('Could not import class ${daClass}');
+				return;
+			}
+			interp.variables.set(daClassName, daClass);
+		}
 	}
 
-	public function get(field:String):Dynamic {
-		if (exists(field)) {return interp.variables.get(field);}
+	public function get(field:String):Dynamic
+	{
+		if (exists(field))
+		{
+			return interp.variables.get(field);
+		}
 		return {};
 	}
 
-	public function set(field:String, value:Dynamic) {
-		if (exists(field)) {return interp.variables.set(field, value);}
+	public function set(field:String, value:Dynamic)
+	{
+		if (exists(field))
+		{
+			return interp.variables.set(field, value);
+		}
 		return {};
 	}
 
 	public function exists(field:String):Bool
 		return interp.variables.exists(field);
 }
+/*
+	class GenericInterp extends Interp {
+	public function new() {
+		super();
+	}
+
+	override public function cnew(cl:String, args:Array<Dynamic>):Dynamic {
+		// Check if class is defined as generic in our context
+		if (cl.indexOf("_") != -1) {
+			var parts = cl.split("_");
+			var baseClass = parts[0];
+			var genericType = parts[1];
+
+			switch (baseClass) {
+				case "FlxTypedGroup":
+					var genericClass:Dynamic = Type.resolveClass(genericType);
+					if (genericClass == null) {
+						genericClass = variables.get(genericType);
+						if (genericClass == null) throw "Unknown generic type: " + genericType;
+					}
+
+					return new FlxTypedGroup<Dynamic>();
+				default:
+					throw "Unsupported generic base class: " + baseClass;
+			}
+		} else {
+			return super.cnew(cl, args);
+		}
+		return null;
+	}
+	}
+
+	class Preprocessor {
+	public static function preprocess(script:String):String {
+		var regex = ~/new\s+(\w+)<(\w+)>/;
+		return regex.replace(script, 'new $1_$2()');
+	}
+}*/

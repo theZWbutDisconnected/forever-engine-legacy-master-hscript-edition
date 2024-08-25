@@ -56,7 +56,7 @@
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
 	<haxelib name="flixel-ui" />
-	<haxelib name="discord_rpc" if="DISCORD_RPC" />
+	<haxelib name="hxdiscord_rpc" if="DISCORD_RPC" />
 	<haxelib name="hscript" />
 	<haxelib name="polymod" />
 	<haxelib name="openfl" />
